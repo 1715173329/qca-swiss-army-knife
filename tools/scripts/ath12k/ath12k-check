@@ -70,6 +70,13 @@ checkpatch_filter = [
     ('qmi_wlfw_qdss_trace_config_download_req_msg_v01_ei', 'LONG_LINE'),
     ('qmi_wlanfw_qdss_trace_config_download_resp_msg_v01_ei', 'LONG_LINE'),
 
+    # parameter exceeds 90 columns in a few places
+    # in .c files the tag lookup is good but it isn't in .h files
+    ('ath12k_wifi7_hal_reo_flush_timeout_list_status', 'LONG_LINE'),
+    ('struct hal_reo_flush_timeout_list_status *desc', 'LONG_LINE'),
+    ('ath12k_wifi7_hal_reo_desc_thresh_reached_status', 'LONG_LINE'),
+    ('struct hal_reo_desc_thresh_reached_status *desc', 'LONG_LINE'),
+
     # workaround for long lines in
     # qmi_wlfw_qdss_trace_config_download_req_msg_v01_ei, for some
     # reason gtags claim they are part of

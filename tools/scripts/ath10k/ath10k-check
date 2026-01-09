@@ -29,7 +29,6 @@ import queue
 import threading
 import string
 import hashlib
-import distutils.spawn
 
 CHECKPATCH_COMMIT = '99b70ece33d87500ef7bee8e32cb99772c45ce14'
 

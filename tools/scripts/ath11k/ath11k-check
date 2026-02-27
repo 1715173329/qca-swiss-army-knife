@@ -71,8 +71,6 @@ CHECKPATCH_IGNORE = ['MSLEEP',
                      # disable for now.
                      'MACRO_ARG_PRECEDENCE',
 
-                     'BOOL_MEMBER',
-
                      # TODO: ath11k uses volatile for now, fix it
                      'VOLATILE',
 

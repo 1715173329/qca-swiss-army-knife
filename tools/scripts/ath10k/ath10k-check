@@ -43,10 +43,6 @@ IGNORE_FILES = ['trace.h']
 CHECKPATCH_IGNORE = ['MSLEEP',
                      'USLEEP_RANGE',
                      'PRINTK_WITHOUT_KERN_LEVEL',
-
-                     # ath10k does not follow networking comment style
-                     'NETWORKING_BLOCK_COMMENT_STYLE',
-
                      'LINUX_VERSION_CODE',
                      'COMPLEX_MACRO',
                      'PREFER_DEV_LEVEL',

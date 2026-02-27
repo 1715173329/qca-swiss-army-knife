@@ -68,8 +68,6 @@ CHECKPATCH_IGNORE = ['MSLEEP',
                      # Not sure if these really useful warnings,
                      # disable for now.
                      'MACRO_ARG_PRECEDENCE',
-
-                     'BOOL_MEMBER',
                      ]
 
 CHECKPATCH_OPTS = ['--strict', '-q', '--terse', '--no-summary',

@@ -88,6 +88,7 @@ CHECKPATCH_OPTS = ['--strict', '-q', '--terse', '--no-summary',
                    '--max-line-length=90', '--show-types']
 
 checkpatch_filter = [
+    ('ath11k_core_get_rproc', 'LONG_LINE_STRING'),
     ('ath11k_read_simulate_fw_crash', 'LONG_LINE'),
     ('qmi_wlanfw_respond_mem_req_msg_v01', 'LONG_LINE'),
     ('DEFINE_EVENT', 'MACRO_ARG_UNUSED'),

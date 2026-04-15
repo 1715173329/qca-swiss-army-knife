@@ -47,6 +47,7 @@ BRANCH_BLACKLIST = [
 
 HW_SUBFOLDER_SEP = '@'
 
+
 @functools.total_ordering
 class Hardware():
     def get_path(self):
@@ -215,43 +216,84 @@ class Firmware():
         s = self.fw_ver
         o = other.fw_ver
 
+        # logger.debug('__lt__(%s, %s)' % (s, o))
+
+        # There are two parts of version in FW name string, one that precedes
+        # -QCA.*- and one that succeeds the same.
+        # Extract the version parts and compare them.
+        # For Eg, WLAN.HMT.1.1.c5-00284-QCAHMTSWPL_V1.0_V2.0_SILICONZ-3
+        # Part1(prefix) = WLAN.HMT.1.1.c5-00284 and Part2(suffix) = 3
+
+        fw_1 = re.match(r'^(.*?)-QCA[^-]+(?:-([\w\.]+))?', s)
+        if fw_1:
+            s_pref = fw_1.group(1)
+            s_suf = fw_1.group(2)
+        else:
+            s_pref = s
+            s_suf = None
+
+        # logger.debug('s_pref:%s, s_suf:%s)' % (s_pref, s_suf))
+
+        fw_2 = re.match(r'^(.*?)-QCA[^-]+(?:-([\w\.]+))?', o)
+        if fw_2:
+            o_pref = fw_2.group(1)
+            o_suf = fw_2.group(2)
+        else:
+            o_pref = o
+            o_suf = None
+
+        # logger.debug('o_pref:%s, o_suf:%s)' % (o_pref, o_suf))
+
         # FIXME: An ugly hack that to make the comparison easier to
         # implement. Just to get some sort of simple sorting working
         # replace '-' with '.' in version string. But now for example
         # '10.2.4.70.2 > 10.2.4.70-2' is not compared correctly.
 
-        s = s.replace('-', '.')
-        o = o.replace('-', '.')
+        s_pref = s_pref.replace('-', '.').split('.')
+        o_pref = o_pref.replace('-', '.').split('.')
+        s = [int(item) if isinstance(item, str) and item.isdigit() else item for item in s_pref]
+        o = [int(item) if isinstance(item, str) and item.isdigit() else item for item in o_pref]
 
-        s = s.split('.')
-        o = o.split('.')
-
-        s2 = s
-        o2 = o
-
-        s = []
-        o = []
-
-        for t in s2:
-            try:
-                k = int(t)
-            except:
-                k = t
-
-            s.append(k)
-
-        for t in o2:
-            try:
-                k = int(t)
-            except:
-                k = t
-
-            o.append(k)
+        # logger.debug('prefix s:%s, o:%s)' % (s, o))
 
         l = min(len(s), len(o))
 
         for i in range(l):
 
+            # logger.debug('s[%d]:%s, o[%d]:%s)' % (i, s[i], i, o[i]))
+            if s[i] < o[i]:
+                return True
+            elif s[i] > o[i]:
+                return False
+
+        # if the minimum length of two version string matches and one of
+        # the input has additional version numbers then consider that as
+        # latest.
+        if len(s) > len(o):
+            return False
+        elif len(s) < len(o):
+            return True
+
+        # If there is no suffix in either of FW, no further comparison
+        # needed.
+        if s_suf is not None and o_suf is None:
+            return False
+        if s_suf is None and o_suf is not None:
+            return True
+
+        # Compare Part2 (suffix) version if prefix matches.
+        s_suf = s_suf.replace('-', '.').split('.')
+        o_suf = o_suf.replace('-', '.').split('.')
+        s = [int(item) if isinstance(item, str) and item.isdigit() else item for item in s_suf]
+        o = [int(item) if isinstance(item, str) and item.isdigit() else item for item in o_suf]
+
+        # logger.debug('suffix s:%s, o:%s)' % (s, o))
+
+        l = min(len(s), len(o))
+
+        for i in range(l):
+
+            # logger.debug('s[%d]:%s, o[%d]:%s)' % (i, s[i], i, o[i]))
             if s[i] < o[i]:
                 return True
             elif s[i] > o[i]:
@@ -546,7 +588,7 @@ def whence_update_extra(linux_firmware, filepaths, version, hw):
     #    '  File: ath11k/WCN6855/hw2.0/' or '  Version: ...WCN6855/hw2.0...'
     base_prefix = f'ath11k/{hw_name}/{hw_base_ver}/'
     driver_pat = re.compile(r'^Driver:\s+ath11k\b')
-    section_end    = re.compile(r'^-------+')  # treat --------- line as ath11k section end
+    section_end = re.compile(r'^-------+')  # treat --------- line as ath11k section end
     section_start = None
     insert_pos = None
     for i, line in enumerate(filtered_lines):
@@ -578,7 +620,7 @@ def whence_update_extra(linux_firmware, filepaths, version, hw):
     license_relpath = None
     for filepath in filepaths:
         relpath = os.path.relpath(filepath, linux_firmware)
-        if relpath.endswith(NOTICE_FILE): # record Notice.txt here, will add later
+        if relpath.endswith(NOTICE_FILE):  # record Notice.txt here, will add later
             license_relpath = relpath
             continue
         new_lines.append('File: %s\n' % (relpath))
@@ -589,7 +631,7 @@ def whence_update_extra(linux_firmware, filepaths, version, hw):
 
     # Add Notice line last here, ensure that Notice.txt is placed at the end
     if license_relpath:
-        new_lines.append(f'File: %s\n' % (license_relpath))
+        new_lines.append(f'File: {license_relpath}\n')
     else:
         logger.error("Notice.txt is required !")
 
@@ -1010,7 +1052,7 @@ def cmd_install(args):
                     continue
 
                 full_path = os.path.join(destdir, filename)
-                if os.path.isdir(full_path): # subfolder <nfa765> will be processed in other HW instance
+                if os.path.isdir(full_path):  # subfolder <nfa765> will be processed in other HW instance
                     logger.debug("full_path:%s is a a sub HW version folder, will be handler in other HW instance" % full_path)
                 else:
                     logger.debug("filename:%s is a file" % filename)

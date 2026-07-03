@@ -70,6 +70,7 @@ checkpatch_filter = [
     ('ath12k_wmi_dcs_interference_event_parser', 'LONG_LINE'),
     ('ath12k_wmi_process_incumbent_signal_interference_evt', 'LONG_LINE'),
     ('ath12k_wmi_validate_interference_info', 'LONG_LINE'),
+    ('ath12k_wmi_vdev_start', 'LONG_LINE'),
     ('ath12k_write_simulate_incumbent_signal_interference', 'LONG_LINE'),
     ('qmi_wlanfw_respond_mem_req_msg_v01', 'LONG_LINE'),
     ('qmi_wlanfw_host_cap_req_msg_v01', 'LONG_LINE'),
